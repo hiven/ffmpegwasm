@@ -10,13 +10,20 @@
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
             const message = document.getElementById('message');
-            try {    
+            try { 
+
+                const { FFmpeg } = FFmpegWASM; 
+                const ffmpeg = new FFmpeg();   
+                message.innerText = 'Loading FFmpeg...'; 
+                await ffmpeg.load('js/ffmpeg-core.js');
+
+                
                 //const { createFFmpeg } = FFmpeg;
                 //const ffmpeg = createFFmpeg();   
-                const ffmpeg = new FFmpeg();
+                //const ffmpeg = new FFmpeg();
                 
-                message.innerText = 'Loading FFmpeg...';
-                await ffmpeg.load();
+                //message.innerText = 'Loading FFmpeg...';
+                //await ffmpeg.load();
                 message.innerText = 'FFmpeg loaded successfully!';
             } catch (error) {
                 console.error('Error loading FFmpeg:', error);

@@ -10,6 +10,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
             const message = document.getElementById('message');
+            import { FFmpeg } from '@ffmpeg/ffmpeg'
             try {  
                 const { FFmpeg } = FFmpeg;
                 const ffmpeg = new FFmpeg();

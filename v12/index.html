@@ -11,6 +11,7 @@
         document.addEventListener("DOMContentLoaded", async () => {
             const message = document.getElementById('message');
             try {  
+                const { createFFmpeg } = FFmpeg;
                 const ffmpeg = new FFmpeg();
                 
                 //const { createFFmpeg } = FFmpeg;

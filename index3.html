@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Video Duration and Trimming</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="js/ffmpeg.js"></script>
+  </head>
+  <body>
+    <h3>Upload an MP4 (x264) video, get its duration, trim its first 10 seconds, and play!</h3>
+    <video id="output-video" controls></video><br />
+    <input type="file" id="uploader">
+    <p id="message"></p>
+    <script>
+      const { FFmpeg } = FFmpegWASM;
+      let ffmpeg = null;
+
+      // Function to load a file as a Uint8Array
+      const fetchFile = async (file) => {
+        const response = await file.arrayBuffer();
+        return new Uint8Array(response);
+      };
+
+      const trim = async ({ target: { files } }) => {
+        const message = document.getElementById('message');
+        if (ffmpeg === null) {
+          ffmpeg = new FFmpeg();
+          ffmpeg.on("log", ({ message }) => {
+            console.log(message);
+          });
+          ffmpeg.on("progress", ({ progress }) => {
+            message.innerHTML = `${(progress * 100).toFixed(2)}% completed`;
+          });
+          await ffmpeg.load({
+            coreURL: "ffmpeg-core.js",
+          });
+        }
+
+        const { name } = files[0];
+        await ffmpeg.writeFile(name, await fetchFile(files[0]));
+
+        // Step 1: Retrieve video metadata
+        message.innerHTML = "Retrieving video duration...";
+        const metadata = await ffmpeg.exec(['-i', name]);
+        const metadataOutput = new TextDecoder().decode(metadata.stdout);
+        message.innerHTML = `Metadata Output: <pre>${metadataOutput}</pre>`;
+
+        // Step 2: Extract duration using regex
+        const durationMatch = metadataOutput.match(/Duration: (\d+):(\d+):(\d+\.\d+)/);
+        if (durationMatch) {
+          const [_, hours, minutes, seconds] = durationMatch;
+          const durationInSeconds =
+            parseInt(hours, 10) * 3600 +
+            parseInt(minutes, 10) * 60 +
+            parseFloat(seconds);
+          console.log(`Video duration: ${durationInSeconds} seconds`);
+          message.innerHTML += `<br>Video duration: ${durationInSeconds.toFixed(2)} seconds`;
+        } else {
+          message.innerHTML += "<br>Unable to determine video duration.";
+          return;
+        }
+
+        // Step 3: Trim video (first 10 seconds)
+        message.innerHTML += "<br>Trimming video...";
+        await ffmpeg.exec(['-i', name, '-ss', '0', '-to', '10', 'output.mp4']);
+        message.innerHTML += "<br>Video trimming completed.";
+
+        // Step 4: Load trimmed video into video element
+        const data = await ffmpeg.readFile('output.mp4');
+        const video = document.getElementById('output-video');
+        video.src = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+      };
+
+      const elm = document.getElementById('uploader');
+      elm.addEventListener('change', trim);
+    </script>
+  </body>
+</html>

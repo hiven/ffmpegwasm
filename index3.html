@@ -13,22 +13,20 @@
     <script>
       const { FFmpeg } = FFmpegWASM;
       let ffmpeg = null;
+      let ffmpegOutput = ''; // Initialize ffmpegOutput
+
+      // Set up FFmpeg logging
+      ffmpeg.setLogger(({ type, message }) => {
+          if (type === 'fferr' || type === 'ffout') {
+              ffmpegOutput += message + '\n';
+          }
+      });
 
       // Function to load a file as a Uint8Array
       const fetchFile = async (file) => {
         const response = await file.arrayBuffer();
         return new Uint8Array(response);
       };
-
-                          // Reset ffmpegOutput
-                    ffmpegOutput = '';
-
-                    // Set up FFmpeg logging
-                    ffmpeg.setLogger(({ type, message }) => {
-                        if (type === 'fferr' || type === 'ffout') {
-                            ffmpegOutput += message + '\n';
-                        }
-                    });
 
       const trim = async ({ target: { files } }) => {
         const message = document.getElementById('message');
@@ -50,8 +48,10 @@
 
         // Step 1: Retrieve video metadata
         message.innerHTML = "Retrieving video duration...";
+        console.log("Retrieving video duration...");
         const metadata = await ffmpeg.exec(['-i', name]);
         const metadataOutput = new TextDecoder().decode(metadata.stdout);
+        console.log("Metadata Output:", metadataOutput);
         message.innerHTML = `Metadata Output: <pre>${metadataOutput}</pre>`;
 
         // Step 2: Extract duration using regex

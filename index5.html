@@ -29,9 +29,9 @@
             message.innerHTML = `${(progress * 100).toFixed(2)} %`;
           });
           await ffmpeg.load({
-            coreURL: "core-mt/ffmpeg-core.js",
-            wasmURL: "core-mt/ffmpeg-core.wasm",
-            workerURL: "core-mt/ffmpeg-core.worker.js",
+            coreURL: "ffmpeg-core.js",
+            wasmURL: "ffmpeg-core.wasm",
+            workerURL: "ffmpeg-core.worker.js",
           });
         }
 

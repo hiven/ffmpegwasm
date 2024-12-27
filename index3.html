@@ -12,7 +12,7 @@
     <p id="message"></p>
     <script>
       const { FFmpeg } = FFmpegWASM;
-      let ffmpeg = null;
+      let ffmpeg = new FFmpeg(); // Initialize ffmpeg
       let ffmpegOutput = ''; // Initialize ffmpegOutput
 
       // Set up FFmpeg logging
@@ -30,8 +30,7 @@
 
       const trim = async ({ target: { files } }) => {
         const message = document.getElementById('message');
-        if (ffmpeg === null) {
-          ffmpeg = new FFmpeg();
+        if (!ffmpeg.isLoaded()) {
           ffmpeg.on("log", ({ message }) => {
             console.log(message);
           });

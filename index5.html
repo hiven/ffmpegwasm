@@ -30,6 +30,8 @@
           });
           await ffmpeg.load({
             coreURL: "core-mt/ffmpeg-core.js",
+            wasmURL: "core-mt/ffmpeg-core.wasm",
+            workerURL: "core-mt/ffmpeg-core.worker.js",
           });
         }
 

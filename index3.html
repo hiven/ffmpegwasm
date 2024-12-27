@@ -20,6 +20,16 @@
         return new Uint8Array(response);
       };
 
+                          // Reset ffmpegOutput
+                    ffmpegOutput = '';
+
+                    // Set up FFmpeg logging
+                    ffmpeg.setLogger(({ type, message }) => {
+                        if (type === 'fferr' || type === 'ffout') {
+                            ffmpegOutput += message + '\n';
+                        }
+                    });
+
       const trim = async ({ target: { files } }) => {
         const message = document.getElementById('message');
         if (ffmpeg === null) {

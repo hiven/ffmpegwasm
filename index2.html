@@ -24,7 +24,7 @@
             console.log(message);
           })
           ffmpeg.on("progress", ({ progress }) => {
-            message.innerHTML = `${progress * 100} %`;
+            message.innerHTML = `${(progress * 100).toFixed(2)} %`;
           });
           await ffmpeg.load({
             coreURL: "/js/core-mt/esm/ffmpeg-core.js",

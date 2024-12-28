@@ -11,6 +11,11 @@
       import { FFmpeg } from "/js/ffmpeg/index.js";
       let ffmpeg = null;
 
+      const fetchFile = async (file) => {
+        const response = await file.arrayBuffer();
+        return new Uint8Array(response);
+      };
+
       const transcode = async ({ target: { files } }) => {
         const message = document.getElementById('message');
         if (ffmpeg === null) {

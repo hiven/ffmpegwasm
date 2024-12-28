@@ -1,7 +1,7 @@
 <html>
   <head>
     <link rel="stylesheet" href="style.css">
-    <script src="js/ffmpeg.js"></script>
+    <script src="/js/ffmpeg.js"></script>
   </head>
   <body>
     <h3>Upload an mp4 (x264) video, trim its first 1 second, and play!</h3>
@@ -29,9 +29,9 @@
             message.innerHTML = `${(progress * 100).toFixed(2)} %`;
           });
           await ffmpeg.load({
-            coreURL: "ffmpeg-core.js",
-            wasmURL: "ffmpeg-core.wasm",
-            workerURL: "ffmpeg-core.worker.js",
+            coreURL: "/js/ffmpeg-core.js",
+            wasmURL: "/js/ffmpeg-core.wasm",
+            workerURL: "/js/ffmpeg-core.worker.js",
           });
         }
 

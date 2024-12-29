@@ -47,14 +47,14 @@
             const m = Number(durationMatches[2]);
             const s = Number(durationMatches[3]);
             duration = h * 3600 + m * 60 + s;
-            console.log(`Duration calculated: ${duration} seconds`);
+            console.log(`Duration: ${duration}`);
           }
 
           // Extract bitrate
           const bitrateRegex = /(\d{1,5}) kb\/s/;
           const bitrateMatches = bitrateRegex.exec(logMessage);
           if (bitrateMatches != null) {
-            bitrate = `${bitrateMatches[1]} kb/s`;
+            bitrate = `${bitrateMatches[1]}`;
             console.log(`Bitrate: ${bitrate}`);
           }
 

@@ -50,7 +50,7 @@
           }
 
           // Extract bitrate
-          const bitrateRegex = /(\d{1,5}) kb\/s/;
+          const bitrateRegex = /Video:.*?(\d{1,5}) kb\/s/;
           const bitrateMatches = bitrateRegex.exec(logMessage);
           if (bitrateMatches != null) {
             bitrate = `${bitrateMatches[1]}`;

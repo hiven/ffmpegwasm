@@ -6,6 +6,7 @@
     <h3>Upload a video to get information like size and duration!</h3>
     <input type="file" id="uploader">
     <p id="message"></p>
+    <p id="log"></p> <!-- New paragraph to display log messages -->
     <script type="module">
       import { FFmpeg } from "/js/ffmpeg/index.js";
       let ffmpeg = null;
@@ -18,10 +19,14 @@
 
       const getVideoInfo = async ({ target: { files } }) => {
         const message = document.getElementById('message');
+        const logElement = document.getElementById('log'); // Element to display log messages
+        logElement.innerHTML = ''; // Clear previous logs
+
         if (ffmpeg === null) {
           ffmpeg = new FFmpeg();
           ffmpeg.on("log", ({ type, message: logMessage }) => {
             console.log(`Log type: ${type}, message: ${logMessage}`); // Output the whole logging message
+            logElement.innerHTML += `<p>${logMessage}</p>`; // Append log messages to logElement
             const regex = /time=(\d{2}):(\d{2}):(\d{2})\.(\d{2})/gm;
             const matches = regex.exec(logMessage);
             if (matches != null) {

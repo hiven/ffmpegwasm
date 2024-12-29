@@ -19,26 +19,26 @@
       const getVideoInfo = async ({ target: { files } }) => {
         const message = document.getElementById('message');
         if (ffmpeg === null) {
-          ffmpeg = new FFmpeg({
-            logger: (msg) => {
-              console.log(msg.message); // Output the whole logging message
-              const regex = /time=(\d{2}):(\d{2}):(\d{2})\.(\d{2})/gm;
-              const matches = regex.exec(String(msg.message));
-              if (matches != null) {
-                const h = Number(matches[1]);
-                const m = Number(matches[2]);
-                const s = Number(matches[3]);
-                duration = h * 3600 + m * 60 + s;
-              }
-            },
-            log: true,
+          ffmpeg = new FFmpeg();
+          ffmpeg.on("log", ({ type, message: logMessage }) => {
+            console.log(`Log type: ${type}, message: ${logMessage}`); // Output the whole logging message
+            const regex = /time=(\d{2}):(\d{2}):(\d{2})\.(\d{2})/gm;
+            const matches = regex.exec(logMessage);
+            if (matches != null) {
+              const h = Number(matches[1]);
+              const m = Number(matches[2]);
+              const s = Number(matches[3]);
+              duration = h * 3600 + m * 60 + s;
+              console.log(`Duration calculated: ${duration} seconds`);
+            }
           });
           await ffmpeg.load({
             coreURL: "/js/core-mt/esm/ffmpeg-core.js",
-            log: true
           });
+          console.log("FFmpeg loaded successfully");
         }
         const { name, size } = files[0];
+        console.log(`File selected: ${name}, size: ${size}`);
         await ffmpeg.writeFile(name, await fetchFile(files[0]));
         message.innerHTML = 'Fetching video information';
         await ffmpeg.exec(['-i', name]);

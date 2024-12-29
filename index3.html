@@ -1,0 +1,50 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <h3>Upload a video to get information like size and duration!</h3>
+    <input type="file" id="uploader">
+    <p id="message"></p>
+    <script type="module">
+      import { FFmpeg } from "/js/ffmpeg/index.js";
+      let ffmpeg = null;
+      let duration = 0;
+
+      const fetchFile = async (file) => {
+        const response = await file.arrayBuffer();
+        return new Uint8Array(response);
+      };
+
+      const getVideoInfo = async ({ target: { files } }) => {
+        const message = document.getElementById('message');
+        if (ffmpeg === null) {
+          ffmpeg = new FFmpeg({
+            logger: (message) => {
+              const regex = /time=(\d{2}):(\d{2}):(\d{2})\.(\d{2})/gm;
+              const matches = regex.exec(String(message.message));
+              if (matches != null) {
+                const h = Number(matches[1]);
+                const m = Number(matches[2]);
+                const s = Number(matches[3]);
+                duration = h * 3600 + m * 60 + s;
+              }
+            },
+            log: true,
+          });
+          await ffmpeg.load({
+            coreURL: "/js/core-mt/esm/ffmpeg-core.js",
+          });
+        }
+        const { name, size } = files[0];
+        await ffmpeg.writeFile(name, await fetchFile(files[0]));
+        message.innerHTML = 'Fetching video information';
+        await ffmpeg.exec(['-i', name]);
+        message.innerHTML = `File size: ${(size / (1024 * 1024)).toFixed(2)} MB<br/>Duration: ${duration} seconds`;
+      }
+
+      const elm = document.getElementById('uploader');
+      elm.addEventListener('change', getVideoInfo);
+    </script>
+  </body>
+</html>

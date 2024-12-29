@@ -34,8 +34,8 @@
           console.log("FFmpeg loaded successfully");
         }
 
-        // Remove previous event listeners and add new ones for each file selection
-        ffmpeg.removeAllListeners("log");
+        // Clear previous event listeners
+        ffmpeg.logHandlers = [];
         ffmpeg.on("log", ({ type, message: logMessage }) => {
           console.log(`Log type: ${type}, message: ${logMessage}`); // Output the whole logging message
           

@@ -58,14 +58,20 @@
             console.log(`Bitrate: ${bitrate}`);
           }
 
-          // Extract resolution and FPS
-          // Extract resolution and FPS
-          const resolutionFpsRegex = /Video: .+ (\d{3,4}x\d{3,4})[^\d]*,.*? (\d{1,3}) fps/;
-          const resolutionFpsMatches = resolutionFpsRegex.exec(logMessage);
-          if (resolutionFpsMatches != null) {
-            resolution = resolutionFpsMatches[1];
-            fps = `${resolutionFpsMatches[2]} fps`;
-            console.log(`Resolution: ${resolution}, FPS: ${fps}`);
+          // Extract resolution
+          const resolutionRegex = /Video: .+ (\d{3,4}x\d{3,4})/;
+          const resolutionMatches = resolutionRegex.exec(logMessage);
+          if (resolutionMatches != null) {
+            resolution = resolutionMatches[1];
+            console.log(`Resolution: ${resolution}`);
+          }
+          
+          // Extract FPS
+          const fpsRegex = /(\d{1,3}) fps/;
+          const fpsMatches = fpsRegex.exec(logMessage);
+          if (fpsMatches != null) {
+            fps = `${fpsMatches[1]} fps`;
+            console.log(`FPS: ${fps}`);
           }
 
         });

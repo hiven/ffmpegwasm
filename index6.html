@@ -83,7 +83,7 @@
         await ffmpeg.writeFile(name, await fetchFile(files[0]));
         message.innerHTML = 'Fetching video information';
         await ffmpeg.exec(['-i', name]);
-        message.innerHTML = `File size: ${(size / (1024 * 1024)).toFixed(2)} MB<br/>Duration: ${duration}`;
+        message.innerHTML = `File size: ${(size / (1024 * 1024)).toFixed(2)}<br/>Duration: ${duration}`;
         videoInfoElement.innerHTML = `Bitrate: ${bitrate}<br/>Width: ${width}<br/>Height: ${height}<br/>FPS: ${fps}`;
       }
 

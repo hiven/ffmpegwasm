@@ -59,15 +59,14 @@
           }
 
           // Extract resolution and FPS
-          const resolutionFpsRegex = /Video: .+ (\d{3,4}x\d{3,4}) .+ (\d{2}) fps/;
+          const resolutionFpsRegex = /Video: .+? (\d{3,4}x\d{3,4})[^,]*, (\d{1,3}) fps/;
           const resolutionFpsMatches = resolutionFpsRegex.exec(logMessage);
           if (resolutionFpsMatches != null) {
             resolution = resolutionFpsMatches[1];
             fps = `${resolutionFpsMatches[2]} fps`;
             console.log(`Resolution: ${resolution}, FPS: ${fps}`);
           }
-        });
-
+          
         const { name, size } = files[0];
         console.log(`File selected: ${name}, size: ${size}`);
         await ffmpeg.writeFile(name, await fetchFile(files[0]));

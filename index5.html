@@ -70,7 +70,7 @@
           const fpsRegex = /(\d{1,3}) fps/;
           const fpsMatches = fpsRegex.exec(logMessage);
           if (fpsMatches != null) {
-            fps = `${fpsMatches[1]} fps`;
+            fps = `${fpsMatches[1]}`;
             console.log(`FPS: ${fps}`);
           }
 

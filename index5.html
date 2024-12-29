@@ -51,25 +51,22 @@
           }
 
           // Extract bitrate
-          const bitrateRegex = /bitrate: (\d+) kb\/s/;
+          const bitrateRegex = /(\d{1,5}) kb\/s/;
           const bitrateMatches = bitrateRegex.exec(logMessage);
           if (bitrateMatches != null) {
             bitrate = `${bitrateMatches[1]} kb/s`;
             console.log(`Bitrate: ${bitrate}`);
           }
 
-
-
-        // Extract resolution and FPS
-        const resolutionFpsRegex = /Video: .+? (\d{3,4}x\d{3,4})[^,]*, (\d{1,3}) fps/;
-        const resolutionFpsMatches = resolutionFpsRegex.exec(logMessage);
-        if (resolutionFpsMatches != null) {
-          resolution = resolutionFpsMatches[1];
-          fps = `${resolutionFpsMatches[2]} fps`;
-          console.log(`Resolution: ${resolution}, FPS: ${fps}`);
-        }
+          // Extract resolution and FPS
+          const resolutionFpsRegex = /(\d{3,4}x\d{3,4}),\s*(\d{1,3}) fps/;
+          const resolutionFpsMatches = resolutionFpsRegex.exec(logMessage);
+          if (resolutionFpsMatches != null) {
+            resolution = resolutionFpsMatches[1];
+            fps = `${resolutionFpsMatches[2]} fps`;
+            console.log(`Resolution: ${resolution}, FPS: ${fps}`);
+          }
         });
-
 
         const { name, size } = files[0];
         console.log(`File selected: ${name}, size: ${size}`);

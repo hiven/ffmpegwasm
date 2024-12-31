@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AVI Thumbnail Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        canvas {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+        }
+        #log {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>AVI Thumbnail Generator</h1>
+    <p>Upload an AVI file to generate a thumbnail:</p>
+    <input type="file" id="fileInput" accept=".avi">
+    <canvas id="thumbnailCanvas"></canvas>
+    <div id="log"></div>
+
+    <!-- Include LibAV.js -->
+    <script src="https://cdn.jsdelivr.net/gh/libav/libav.js/dist/libav.js"></script>
+    <script>
+        function logMessage(message) {
+            const logDiv = document.getElementById("log");
+            logDiv.textContent += message + "\n";
+        }
+
+        async function generateThumbnail(file) {
+            try {
+                logMessage("Loading LibAV...");
+                const libav = await LibAV.LibAV({ noworker: true });
+                logMessage("LibAV loaded");
+
+                logMessage("Reading file...");
+                const fileBuffer = await file.arrayBuffer();
+                const inputBuffer = new Uint8Array(fileBuffer);
+                logMessage("File read into buffer");
+
+                logMessage("Writing file to LibAV FS...");
+                await libav.writeFile("input.avi", inputBuffer);
+                logMessage("File written to LibAV FS");
+
+                logMessage("Initializing demuxer...");
+                const [fmtCtx, streams] = await libav.ff_init_demuxer_file("input.avi");
+                const videoStream = streams.findIndex((s) => s.codec_type === libav.AVMEDIA_TYPE_VIDEO);
+                if (videoStream < 0) {
+                    logMessage("No video stream found!");
+                    alert("No video stream found in the file!");
+                    return;
+                }
+                logMessage("Demuxer initialized, video stream found");
+
+                logMessage("Initializing decoder...");
+                const [, codecCtx] = await libav.ff_init_decoder(fmtCtx, videoStream);
+                logMessage("Decoder initialized");
+
+                logMessage("Reading frames...");
+                const packets = await libav.ff_read_multi(fmtCtx, codecCtx, [videoStream]);
+                const frames = packets[videoStream];
+                if (frames.length === 0) {
+                    logMessage("No frames decoded!");
+                    alert("No frames could be decoded!");
+                    return;
+                }
+                logMessage("Frames decoded");
+
+                logMessage("Extracting frame data...");
+                const frame = frames[0];
+                const width = codecCtx.width;
+                const height = codecCtx.height;
+
+                const canvas = document.getElementById("thumbnailCanvas");
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext("2d");
+                const imageData = ctx.createImageData(width, height);
+
+                const rgbaData = new Uint8ClampedArray(frame.data.length * 4 / 3);
+                let j = 0;
+                for (let i = 0; i < frame.data.length; i += 3) {
+                    rgbaData[j++] = frame.data[i];     // R
+                    rgbaData[j++] = frame.data[i + 1]; // G
+                    rgbaData[j++] = frame.data[i + 2]; // B
+                    rgbaData[j++] = 255;               // A (fully opaque)
+                }
+
+                imageData.data.set(rgbaData);
+                ctx.putImageData(imageData, 0, 0);
+
+                logMessage("Frame rendered to canvas");
+
+                await libav.ff_free_decoder(codecCtx);
+                await libav.ff_free_demuxer(fmtCtx);
+                libav.terminate();
+                logMessage("LibAV resources cleaned up");
+            } catch (error) {
+                logMessage("Error generating thumbnail: " + error.message);
+                alert("An error occurred. Check the logs below for details.");
+            }
+        }
+
+        document.getElementById("fileInput").addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                generateThumbnail(file).catch(error => logMessage("Error: " + error.message));
+            }
+        });
+    </script>
+</body>
+</html>

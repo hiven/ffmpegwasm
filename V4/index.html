@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AVI Thumbnail Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        canvas {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>AVI Thumbnail Generator</h1>
+    <p>Upload an AVI file to generate a thumbnail:</p>
+    <input type="file" id="fileInput" accept=".avi">
+    <canvas id="thumbnailCanvas"></canvas>
+
+    <!-- Include LibAV.js -->
+    <script src="https://cdn.jsdelivr.net/gh/libav/libav.js/dist/libav.js"></script>
+    <script>
+        async function generateThumbnail(file) {
+            try {
+                // Load LibAV
+                const libav = await LibAV.LibAV({ noworker: true });
+
+                // Read the input file into a buffer
+                const fileBuffer = await file.arrayBuffer();
+                const inputBuffer = new Uint8Array(fileBuffer);
+
+                // Write the buffer to LibAV FS
+                await libav.writeFile("input.avi", inputBuffer);
+
+                // Open the video file and find a video stream
+                const [fmtCtx, streams] = await libav.ff_init_demuxer_file("input.avi");
+                const videoStream = streams.findIndex((s) => s.codec_type === libav.AVMEDIA_TYPE_VIDEO);
+
+                if (videoStream < 0) {
+                    console.error("No video stream found!");
+                    alert("No video stream found in the file!");
+                    return;
+                }
+
+                // Open the codec for the video stream
+                const [, codecCtx] = await libav.ff_init_decoder(fmtCtx, videoStream);
+
+                // Decode the first frame
+                const packets = await libav.ff_read_multi(fmtCtx, codecCtx, [videoStream]);
+                const frames = packets[videoStream];
+                if (frames.length === 0) {
+                    console.error("No frames decoded!");
+                    alert("No frames could be decoded!");
+                    return;
+                }
+
+                // Extract the frame data
+                const frame = frames[0];
+                const width = codecCtx.width;
+                const height = codecCtx.height;
+
+                // Create a canvas to render the frame
+                const canvas = document.getElementById("thumbnailCanvas");
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext("2d");
+                const imageData = ctx.createImageData(width, height);
+
+                // Convert frame data to RGBA
+                const rgbaData = new Uint8ClampedArray(frame.data.length * 4 / 3);
+                let j = 0;
+                for (let i = 0; i < frame.data.length; i += 3) {
+                    rgbaData[j++] = frame.data[i];     // R
+                    rgbaData[j++] = frame.data[i + 1]; // G
+                    rgbaData[j++] = frame.data[i + 2]; // B
+                    rgbaData[j++] = 255;              // A (fully opaque)
+                }
+
+                // Set frame data to canvas
+                imageData.data.set(rgbaData);
+                ctx.putImageData(imageData, 0, 0);
+
+                // Clean up
+                await libav.ff_free_decoder(codecCtx);
+                await libav.ff_free_demuxer(fmtCtx);
+                libav.terminate();
+            } catch (error) {
+                console.error("Error generating thumbnail:", error);
+                alert("An error occurred. Check the console for details.");
+            }
+        }
+
+        // Event listener for file input
+        document.getElementById("fileInput").addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                generateThumbnail(file).catch(console.error);
+            }
+        });
+    </script>
+</body>
+</html>

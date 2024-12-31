@@ -55,31 +55,22 @@
       const video = document.createElement('video');
       video.src = URL.createObjectURL(file);
 
-      video.addEventListener('loadeddata', () => {
-        // Ensure the timestamp is within the video duration
+      video.addEventListener('loadedmetadata', () => {
         if (timestamp > video.duration) {
           alert(`Timestamp exceeds video duration. Max duration: ${video.duration.toFixed(2)} seconds.`);
           return;
         }
-        
         video.currentTime = timestamp;
       });
 
       video.addEventListener('seeked', () => {
-        // Set canvas size to video frame size
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-
-        // Draw the frame to the canvas
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        // Convert canvas to image URL
         const thumbnailUrl = canvas.toDataURL('image/jpeg');
         output.classList.remove('hidden');
         output.textContent = 'Thumbnail generated! Right-click on the canvas to save the image.';
         canvas.classList.remove('hidden');
-
-        // Release object URL
         URL.revokeObjectURL(video.src);
       });
     });
